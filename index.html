@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bozor Iqtisodiyoti — 45 Talik Viktorina O'yini</title>
+
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Setup Screen */
+        .setup-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.6);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .team-card {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .team-card.active-turn {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            transform: scale(1.03);
+        }
+
+        .team-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .team-score {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Quiz Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 20px;
+            border-radius: 12px;
+        }
+
+        .timer {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+
+        .question-number {
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        /* Question Box */
+        .question-box {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .option-btn.correct {
+            background: rgba(34, 197, 94, 0.3) !important;
+            border-color: var(--success) !important;
+            color: #fff;
+        }
+
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.3) !important;
+            border-color: var(--error) !important;
+            color: #fff;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Turn Bar */
+        .turn-bar {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 15px;
+            padding: 8px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Results Screen */
+        .winner-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+            border: 2px solid #fbbf24;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .winner-title {
+            font-size: 1.8rem;
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+
+        .winner-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .leaderboard th, .leaderboard td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard th {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. SOZLAMALAR EKRANI -->
+        <div id="setup-screen" class="screen active">
+            <h1>Bozor Iqtisodiyoti — Viktorina</h1>
+            <p style="text-align: center; color: #94a3b8; margin-bottom: 30px;">
+                V-BOB: Bozor iqtisodiyotining mazmuni va amal qilishi (45 ta savol)
+            </p>
+
+            <div class="setup-group">
+                <label for="team-count">Komandalar sonini tanlang (3, 4 yoki 5 ta):</label>
+                <select id="team-count" onchange="generateTeamInputs()">
+                    <option value="3">3 ta komanda</option>
+                    <option value="4" selected>4 ta komanda</option>
+                    <option value="5">5 ta komanda</option>
+                </select>
+            </div>
+
+            <div class="setup-group" id="team-inputs-container">
+                <!-- Dynamic Team Inputs -->
+            </div>
+
+            <button class="btn" onclick="startGame()">O'yinni Boshlash</button>
+        </div>
+
+        <!-- 2. O'YIN EKRANI -->
+        <div id="quiz-screen" class="screen">
+            <div class="scoreboard" id="scoreboard">
+                <!-- Dynamic Teams Scoreboard -->
+            </div>
+
+            <div class="turn-bar" id="turn-bar">
+                Hozirgi navbat: <span id="current-team-turn">Komanda 1</span>
+            </div>
+
+            <div class="quiz-header">
+                <span class="question-number" id="question-number">Savol 1 / 45</span>
+                <span class="timer" id="timer">⏱️ 45s</span>
+            </div>
+
+            <div class="question-box" id="question-text">
+                Savol yuklanmoqda...
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Dynamic Options -->
+            </div>
+        </div>
+
+        <!-- 3. NATIJALAR EKRANI -->
+        <div id="result-screen" class="screen">
+            <h1>O'yin Yakunlandi!</h1>
+
+            <div class="winner-card">
+                <div class="winner-title">🏆 G'olib Komanda 🏆</div>
+                <div class="winner-name" id="winner-name">Komanda Name</div>
+            </div>
+
+            <h2>Yakuniy Natijalar</h2>
+            <table class="leaderboard">
+                <thead>
+                    <tr>
+                        <th>O'rin</th>
+                        <th>Komanda Nomi</th>
+                        <th>Ball</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Dynamic Leaderboard -->
+                </tbody>
+            </table>
+
+            <button class="btn" onclick="resetGame()">Qaytadan Boshlash</button>
+        </div>
+    </div>
+
+    <script>
+        // 45 Ta Savollar Bazasi (Taqdimot materiallari asosida, to'g'ri javoblar A, B, C, D bo'ylab taqsimlangan)
+        const questions = [
+            {
+                q: "Tovar xo'jaligi va ayirboshlashdan so'ng savdo jarayonini nima tezlashtirgan?",
+                options: ["Pul paydo bo'lishi", "Banklar tashkil etilishi", "Bojxona tizimi", "Internet tarmoqlari"],
+                answer: 0
+            },
+            {
+                q: "XVII–XVIII asrlarda qanday tizim shakllandi?",
+                options: ["Ma'muriy-buyruqbozlik tizimi", "Xususiy mulkka asoslangan bozor tizimi", "An'anaviy xo'jalik tizimi", "Sotsialistik reja xo'jaligi"],
+                answer: 1
+            },
+            {
+                q: "Bozor modelini belgilovchi asosiy omillar qatoriga nimalar kiradi?",
+                options: ["Faqat soliqlar va narxlar", "Faqat aholi soni va hudud", "Geografik o'rin, tabiiy resurslar va tarixiy taraqqiyot", "Faqat xorijiy valyuta kursi"],
+                answer: 2
+            },
+            {
+                q: "Amerika bozor modelining asosiy xususiyati qaysi?",
+                options: ["Davlatning to'liq rejalashtirishi", "Kuchli sotsialistik boshqaruv", "Mulkni davlat tasarrufiga o'tkazish", "Davlat aralashuvi nisbatan kamligi va tadbirkorlik rag'batlantirilishi"],
+                answer: 3
+            },
+            {
+                q: "Yaponiya bozor modelining ustuvor yo'nalishi nima?",
+                options: ["Sanoatni rivojlantirish, davlat va biznes hamkorligi, texnologiya va eksport", "Faqat qishloq xo'jaligini rivojlantirish", "Tashqi savdoni to'liq cheklash", "Davlat korxonalarini subsidiyalash"],
+                answer: 0
+            },
+            {
+                q: "Shved bozor modelining asosiy xususiyati nima?",
+                options: ["Raqobatni butunlay bekor qilish", "Ijtimoiy himoya kuchli va daromadlar farqini kamaytirish", "Solliqlarni nolga tushirish", "Faqat yirik monopoliyalarni qo'llab-quvvatlash"],
+                answer: 1
+            },
+            {
+                q: "Fransuz bozor modelining boshqa modellardan farqli jihati nimada?",
+                options: ["Davlatning ishtiroki umuman yo'q", "Faqat barter munosabatlariga asoslangan", "Davlatning tartibga solishdagi roli va ishtiroki yuqori", "Xususiy mulk taqiqlangan"],
+                answer: 2
+            },
+            {
+                q: "Janubiy Koreya bozor modelining asosiy maqsadi nima bo'lgan?",
+                options: ["Ichki bozorni yopish", "Faqat xomashyo eksport qilish", "Hunarmandchilikni saqlash", "Eksportni rag'batlantirish va tez sanoatlashuv"],
+                answer: 3
+            },
+            {
+                q: "Xitoy bozor modelida nimalar uyg'unlashgan?",
+                options: ["Bozor mexanizmlari va davlat rejalashtiruvi", "Feodalizm va kapitalizm", "Faqat an'anaviy urf-odatlar", "Quldorlik va bozor munosabatlari"],
+                answer: 0
+            },
+            {
+                q: "Rossiya bozor modelining shakllanishida nimalarning unsurlari uyg'unlashgan?",
+                options: ["Faqat erkin bozor unsurlari", "Markazlashgan boshqaruv unsurlari va bozor mexanizmlari", "Faqat qishloq jamoalari boshqaruvi", "Xalqaro banklar direktivasi"],
+                answer: 1
+            },
+            {
+                q: "Bozor iqtisodiyoti ta'rifiga ko'ra qaysi mulk ustuvor bo'lishi kerak?",
+                options: ["Jamoat mulki", "Davlat mulki", "Xususiy mulk", "Aksiya jamg'armasi mulki"],
+                answer: 2
+            },
+            {
+                q: "Bozor iqtisodiyoti qanday munosabatlarga tayanadi?",
+                options: ["Buyruqbozlik va taqsimotga", "Majburiy mehnatga", "Faqat gumanitar yordamga", "Tovar-pul munosabatlariga"],
+                answer: 3
+            },
+            {
+                q: "Bozor iqtisodiyotining asosiy belgilariga nimalar kiradi?",
+                options: ["Mulkchilik xilma-xilligi, erkin narxlar va raqobat", "Faqat davlat tomonidan belgilangan narxlar", "Markazlashgan reja va talon tizimi", "Erkin raqobatning qonun bilan taqiqlanishi"],
+                answer: 0
+            },
+            {
+                q: "Bozor subyektlaridan biri bo'lgan uy xo'jaliklari qanday vazifani bajaradi?",
+                options: ["Faqat soliq yig'adi", "Tovar va xizmatlarni iste'mol qiladi hamda resurslarni taklif etadi", "Qonunlar qabul qiladi", "Pul emissiya qiladi"],
+                answer: 1
+            },
+            {
+                q: "Tadbirkorlarning bozor iqtisodiyotidagi asosiy intilishi nimadan iborat?",
+                options: ["Zarar ko'rishga", "Faqat tekin xizmat ko'rsatishga", "Foyda olishga va ish o'rinlari yaratishga", "Ishlab chiqarishni to'xtatishga"],
+                answer: 2
+            },
+            {
+                q: "Davlatning bozor iqtisodiyotidagi vazifasiga nimalar kiradi?",
+                options: ["Faqat shaxsiy biznes bilan shug'ullanish", "Barcha narxlarni o'zi yakka tartibda belgilash", "Tadbirkorlikni butunlay taqiqlash", "Qonun va qoidalarni belgilash, iqtisodiyotni tartibga solish"],
+                answer: 3
+            },
+            {
+                q: "Bozor mexanizmining to'rtta asosiy elementi qaysilar?",
+                options: ["Talab, taklif, narx va raqobat", "Soliq, kredit, sug'urta, litsenziya", "Eksport, import, valyuta, bojxona", "Reja, balans, fond, fond birjasi"],
+                answer: 0
+            },
+            {
+                q: "Klassik (sof) bozor va hozirgi zamon aralash bozorining farqi nimada?",
+                options: ["Aralash bozorda davlat bozorni tartibga soladi", "Klassik bozorda soliqlar juda yuqori bo'lgan", "Klassik bozorda internet bo'lgan", "Aralash bozorda raqobat umuman yo'q"],
+                answer: 1
+            },
+            {
+                q: "Bozor iqtisodiyotining 5 asosiy muammosidan birinchisi qaysi?",
+                options: ["Kimga sotish kerak?", "Qachon ta'tilga chiqish kerak?", "Nima ishlab chiqarish?", "Qaysi valyutada hisob-kitob qilish kerak?"],
+                answer: 2
+            },
+            {
+                q: "Bozor iqtisodiyotining ikkinchi muammosi ('Qanday ishlab chiqarish?') qanday hal etiladi?",
+                options: ["Qo'l mehnati yordamida", "Faqat eskicha usullarda", "Majburiy buyruqlar asosida", "Samarali texnika va texnologiyalar yordamida"],
+                answer: 3
+            },
+            {
+                q: "Bozor iqtisodiyotining uchinchi muammosi ('Qancha ishlab chiqarish?') nimaga asoslanadi?",
+                options: ["Resurslar va xaridorlar talabiga mos miqdorda", "Faqat rahbarning xohishiga", "Zavod omborining sig'imiga", "Ob-havo sharoitiga"],
+                answer: 0
+            },
+            {
+                q: "Bozor iqtisodiyotining to'rtinchi muammosi ('Kim uchun ishlab chiqarish?') nimaga qarab belgilanadi?",
+                options: ["Faqat davlat amaldorlariga", "Aholining ehtiyojlari va xarid qobiliyatiga qarab", "Faqat chet elliklarga", "Tasodifiy tanlovga"],
+                answer: 1
+            },
+            {
+                q: "Bozor iqtisodiyotining beshinchi muammosi ('O'zgarishga moslashish') nimani anglatadi?",
+                options: ["Eski tizimni saqlab qolishni", "Ishlab chiqarishni yopishni", "Yangi talab va sharoitlarga mos qarorlar qabul qilishni", "Narxlarni sun'iy ushlab turishni"],
+                answer: 2
+            },
+            {
+                q: "Bozor iqtisodiyotining asosiy afzalliklari qaysilar?",
+                options: ["Faqat tengsizlik va inflyatsiya", "Monopoliya va inqiroz", "Rejali taqsimot", "Samaradorlik, erkinlik va rag'bat"],
+                answer: 3
+            },
+            {
+                q: "Bozor iqtisodiyotining kamchiliklari qatoriga nimalar kiradi?",
+                options: ["Monopollashuv, daromadlar tengsizligi va inflyatsiya", "Ishlab chiqarishning yuqori samaradorligi", "Raqobatning foydali tomonlari", "Iste'molchilar tanlovining kengligi"],
+                answer: 0
+            },
+            {
+                q: "O'tish davri deganda nimani tushunamiz?",
+                options: ["Faqat yozdan qishga o'tishni", "Ma'muriy-buyruqbozlik tizimidan bozor munosabatlariga o'tish jarayonini", "Xalqaro sayohatni", "Faqat pul birligini almashtirishni"],
+                answer: 1
+            },
+            {
+                q: "Sobiq sotsialistik mamlakatlar qanday yo'ldan o'tgan?",
+                options: ["An'anaviy xo'jalikdan ibtidoiy jamoaga", "Kapitalizmdan feodalizmga", "Markazlashgan reja tizimidan bozor mexanizmlariga", "Faqat natural xo'jalikka"],
+                answer: 2
+            },
+            {
+                q: "O'zbekistonning bozor iqtisodiyotiga o'tishidagi 1-tamoyili qanday?",
+                options: ["Davlat — iste'molchi", "Faqat xorijiy investitsiya", "Siyosat iqtisodiyotdan ustun", "Iqtisodiyot siyosatdan ustun"],
+                answer: 3
+            },
+            {
+                q: "O'zbekiston tajribasida islohotlarni kim boshqargan va yo'naltirgan?",
+                options: ["Davlat — bosh islohotchi sifatida", "Faqat xususiy shaxslar", "Xalqaro valyuta fondi", "Tashqi kompaniyalar"],
+                answer: 0
+            },
+            {
+                q: "O'zbekistonning bozor munosabatlariga o'tishidagi 3-tamoyili qaysi?",
+                options: ["Narxlarni nazoratsiz qo'yib yuborish", "Qonun ustuvorligi", "Faqat qo'l mehnati", "Imtiyozli kreditlash"],
+                answer: 1
+            },
+            {
+                q: "O'zbekiston islohotlarining 4-tamoyili nima deb ataladi?",
+                options: ["Erkin soliqqa tortish", "Minimal byudjet", "Kuchli ijtimoiy himoya", "O'z-o'zini moliyalashtirish"],
+                answer: 2
+            },
+            {
+                q: "O'zbekiston tajribasidagi 5-tamoyil qanday nomlanadi?",
+                options: ["Shok terapiyasi", "Tezkor o'tish", "Keskin inqilob", "Bosqichma-bosqich o'tish"],
+                answer: 3
+            },
+            {
+                q: "O'tish davrining 1-bosqichida qanday vazifalar bajarilgan?",
+                options: ["Iqtisodiy tanglikni yengish, barqarorlashtirish va kichik xususiylashtirish", "Faqat kosmik tadqiqotlar", "Xalqaro bozorni egallash", "Harbiy sanoatni kuchaytirish"],
+                answer: 0
+            },
+            {
+                q: "O'tish davrining 2-bosqichida nimalarga e'tibor qaratilgan?",
+                options: ["Faqat qishloq xo'jaligini qisqartirishga", "Investitsiyalarni kuchaytirish, tarkibiy o'zgarishlar va iqtisodiy o'sishni ta'minlash", "Barcha fabrikalarni yopishga", "Pul emissiyasini to'xtatishga"],
+                answer: 1
+            },
+            {
+                q: "Taraqqiyot strategiyasining asosiy ustuvor yo'nalishlariga nimalar kiradi?",
+                options: ["Faqat sport musobaqalari", "Faqat tashqi savdo bitimlari", "Davlat va jamiyat qurilishi, qonun ustuvorligi, iqtisodiyot va ijtimoiy soha", "Faqat turizmni rivojlantirish"],
+                answer: 2
+            },
+            {
+                q: "Bozor tushunchasining zamonaviy talqini nima?",
+                options: ["Faqat mahsulot sotiladigan qadimiy bozor rastalari", "Faqat shahar markazidagi savdo majmualari", "Faqat supermarketlar tarmog'i", "Ishlab chiqaruvchi va iste'molchilar o'rtasida tovar, xizmat va resurslar almashinuvini ta'minlaydigan tizim"],
+                answer: 3
+            },
+            {
+                q: "Bozorning asosiy vazifalari qaysilar?",
+                options: ["Bog'lovchi, axborot beruvchi, tartibga soluvchi, narx shakllantiruvchi va rag'batlantiruvchi", "Faqat soliq yig'ish va jarima solish", "Faqat ish haqi tarqatish", "Faqat importni cheklash"],
+                answer: 0
+            },
+            {
+                q: "Bozor turlari qaysi mezonlarga ko'ra tasniflanadi?",
+                options: ["Faqat narxiga qarab", "Hududiy ko'lam, obyektiga ko'ra, savdo hajmi, yetuklik darajasi va aloqa shakli", "Faqat rangiga qarab", "Faqat ishchilar soniga qarab"],
+                answer: 1
+            },
+            {
+                q: "Bozor segmentatsiyasi nima maqsadda amalga oshiriladi?",
+                options: ["Bozorni butunlay yopish uchun", "Mahsulotlar narxini bir xil qilish uchun", "Bozorni xaridorlar yoki mahsulot xususiyatlariga ko'ra guruhlarga ajratib, ehtiyojni qondirish uchun", "Faqat davlat hisobotini yuritish uchun"],
+                answer: 2
+            },
+            {
+                q: "Tovar va xizmatlar bozorida uy xo'jaliklari va korxonalar qanday harakat qiladi?",
+                options: ["Faqat qarz oladi", "Faqat valyuta ayirboshlaydi", "Faqat litsenziya sotib oladi", "Uy xo'jaliklari mahsulot xarid qiladi, korxonalar mahsulot sotadi"],
+                answer: 3
+            },
+            {
+                q: "Resurslar bozorida korxonalar nimalarni olib keladi?",
+                options: ["Mehnat, xomashyo va kapitalni", "Faqat tayyor kiyim-kechakni", "Faqat maishiy texnikani", "Faqat chet el valyutasini"],
+                answer: 0
+            },
+            {
+                q: "Doiraviy aylanish modelida real oqim nimani bildiradi?",
+                options: ["Faqat pul va daromadlarni", "Resurslar, tovar va xizmatlarning jismoniy harakatini", "Faqat soliq to'lovlarini", "Faqat bank foizlarini"],
+                answer: 1
+            },
+            {
+                q: "Mehnat birjasining asosiy vazifasi nima?",
+                options: ["Faqat valyuta oldi-sotdisi", "Faqat qimmatli qog'ozlar savdosi", "Ishsizlarni ro'yxatga olish, mos ish topishga ko'maklashish va kasbga o'qitish", "Faqat tadbirkorlarni tekshirish"],
+                answer: 2
+            },
+            {
+                q: "Moliya bozori qanday asosiy bo'g'inlarga bo'linadi?",
+                options: ["Faqat oziq-ovqat va kiyim-kechak bozori", "Faqat ko'chmas mulk va avtomobil bozori", "Faqat chakana savdo bozori", "Qarz majburiyatlari bozori (ssuda kapitali) va kapital bozori"],
+                answer: 3
+            },
+            {
+                q: "Bozor infratuzilmasining asosiy muassasalari qaysilar?",
+                options: ["Birja, auksion, bank, sug'urta kompaniyasi va auditorlik firmasi", "Faqat maktablar va kasalxonalar", "Faqat teatrlar va kinoteatrlar", "Faqat sport maydonchalari"],
+                answer: 0
+            }
+        ];
+
+        // O'yin holati
+        let teamCount = 4;
+        let teams = [];
+        let currentQuestionIdx = 0;
+        let currentTeamIdx = 0;
+        let timerInterval = null;
+        let timeLeft = 45;
+        let canAnswer = true;
+
+        // Audio synthesizer (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3); // A2
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // Dastlabki komanda kiritish maydonlarini yaratish
+        generateTeamInputs();
+
+        function generateTeamInputs() {
+            teamCount = parseInt(document.getElementById('team-count').value);
+            const container = document.getElementById('team-inputs-container');
+            container.innerHTML = '<label>Komanda nomlarini kiriting:</label>';
+
+            for (let i = 1; i <= teamCount; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `team-name-input-${i}`;
+                input.value = `${i}-Komanda`;
+                input.placeholder = `${i}-Komanda nomi`;
+                container.appendChild(input);
+            }
+        }
+
+        function startGame() {
+            teams = [];
+            for (let i = 1; i <= teamCount; i++) {
+                const nameInput = document.getElementById(`team-name-input-${i}`);
+                teams.push({
+                    name: nameInput.value.trim() || `${i}-Komanda`,
+                    score: 0
+                });
+            }
+
+            currentQuestionIdx = 0;
+            currentTeamIdx = 0;
+
+            showScreen('quiz-screen');
+            renderScoreboard();
+            loadQuestion();
+        }
+
+        function renderScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            scoreboard.innerHTML = '';
+
+            teams.forEach((team, idx) => {
+                const card = document.createElement('div');
+                card.className = `team-card ${idx === currentTeamIdx ? 'active-turn' : ''}`;
+                card.innerHTML = `
+                    <div class="team-name">${team.name}</div>
+                    <div class="team-score">${team.score}</div>
+                `;
+                scoreboard.appendChild(card);
+            });
+
+            document.getElementById('current-team-turn').innerText = teams[currentTeamIdx].name;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIdx >= questions.length) {
+                endGame();
+                return;
+            }
+
+            canAnswer = true;
+            timeLeft = 45;
+            document.getElementById('timer').innerText = `⏱️ ${timeLeft}s`;
+
+            const qData = questions[currentQuestionIdx];
+            document.getElementById('question-number').innerText = `Savol ${currentQuestionIdx + 1} / ${questions.length}`;
+            document.getElementById('question-text').innerText = qData.q;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            qData.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `${String.fromCharCode(65 + idx)}) ${optText}`;
+                btn.onclick = () => handleAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = `⏱️ ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleAnswer(-1); // Vaqt tugadi
+                }
+            }, 1000);
+        }
+
+        function handleAnswer(selectedIdx) {
+            if (!canAnswer) return;
+            canAnswer = false;
+            clearInterval(timerInterval);
+
+            const qData = questions[currentQuestionIdx];
+            const optionBtns = document.querySelectorAll('.option-btn');
+
+            if (selectedIdx === qData.answer) {
+                playSound('correct');
+                if (selectedIdx >= 0) optionBtns[selectedIdx].classList.add('correct');
+                teams[currentTeamIdx].score += 10;
+                
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+            } else {
+                playSound('wrong');
+                if (selectedIdx >= 0) optionBtns[selectedIdx].classList.add('wrong');
+                optionBtns[qData.answer].classList.add('correct');
+            }
+
+            optionBtns.forEach(btn => btn.disabled = true);
+
+            setTimeout(() => {
+                currentQuestionIdx++;
+                currentTeamIdx = (currentTeamIdx + 1) % teams.length;
+                renderScoreboard();
+                loadQuestion();
+            }, 2000);
+        }
+
+        function endGame() {
+            showScreen('result-screen');
+
+            const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+            document.getElementById('winner-name').innerText = sortedTeams[0].name;
+
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            leaderboardBody.innerHTML = '';
+
+            sortedTeams.forEach((team, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><strong>${team.name}</strong></td>
+                    <td><span style="color: var(--accent); font-weight: bold;">${team.score}</span> ball</td>
+                `;
+                leaderboardBody.appendChild(tr);
+            });
+
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 7,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 7,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+
+        function resetGame() {
+            showScreen('setup-screen');
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
